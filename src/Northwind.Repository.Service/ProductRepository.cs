@@ -20,26 +20,15 @@ namespace Northwind.Repository.Service
             _context = context;
         }
 
-        private Product MappingRecordToObj(string sql, object param = null)
+        private IEnumerable<Product> MappingRecordToObj(string sql, object param = null)
         {
             var product = _context.db.Query<Product, Category, Product>(_sql, (p, c) =>
             {
                 p.CategoryID = c.CategoryID; p.Category = c;
                 return p;
-            }, param, splitOn: "CategoryID").SingleOrDefault();
+            }, param, splitOn: "CategoryID");
 
             return product;
-        }
-
-        private IList<Product> MappingRecordToList(string sql, object param = null)
-        {
-            var listOfProduct = _context.db.Query<Product, Category, Product>(_sql, (p, c) =>
-            {
-                p.CategoryID = c.CategoryID; p.Category = c;
-                return p;
-            }, param, splitOn: "CategoryID").ToList();
-
-            return listOfProduct;
         }
 
         public Product GetByID(int productId)
@@ -54,7 +43,7 @@ namespace Northwind.Repository.Service
                          FROM Products INNER JOIN Categories ON Categories.CategoryId = Products.CategoryId 
                          WHERE Products.ProductID = @productId";
 
-                product = MappingRecordToObj(_sql, new { productId });
+                product = MappingRecordToObj(_sql, new { productId }).SingleOrDefault();
             }
             catch
             {
@@ -76,7 +65,7 @@ namespace Northwind.Repository.Service
                          WHERE Categories.CategoryID = @categoryId
                          ORDER BY Products.ProductName";
 
-                listOfProduct = MappingRecordToList(_sql, new { categoryId });
+                listOfProduct = MappingRecordToObj(_sql, new { categoryId }).ToList();
             }
             catch
             {
@@ -99,7 +88,7 @@ namespace Northwind.Repository.Service
                          ORDER BY Products.ProductName";
 
                 productName = string.Format("%{0}%", productName);
-                listOfProduct = MappingRecordToList(_sql, new { productName });
+                listOfProduct = MappingRecordToObj(_sql, new { productName }).ToList();
             }
             catch
             {
@@ -120,7 +109,7 @@ namespace Northwind.Repository.Service
                          FROM Products INNER JOIN Categories ON Categories.CategoryId = Products.CategoryId 
                          ORDER BY Products.ProductName";
 
-                listOfProduct = MappingRecordToList(_sql);
+                listOfProduct = MappingRecordToObj(_sql).ToList();
             }
             catch
             {
