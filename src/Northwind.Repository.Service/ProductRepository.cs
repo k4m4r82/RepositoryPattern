@@ -61,7 +61,29 @@ namespace Northwind.Repository.Service
             }
 
             return product;
-        }        
+        }
+
+        public IList<Product> GetByCategory(int categoryId)
+        {
+            IList<Product> listOfProduct = new List<Product>();
+
+            try
+            {
+                _sql = @"SELECT Products.ProductID, Products.ProductName, Products.QuantityPerUnit, 
+                         Products.UnitPrice, Products.UnitsInStock,
+                         Categories.CategoryID, Categories.CategoryName, Categories.Description
+                         FROM Products INNER JOIN Categories ON Categories.CategoryId = Products.CategoryId 
+                         WHERE Categories.CategoryID = @categoryId
+                         ORDER BY Products.ProductName";
+
+                listOfProduct = MappingRecordToList(_sql, new { categoryId });
+            }
+            catch
+            {
+            }
+
+            return listOfProduct;
+        }
 
         public IList<Product> GetByName(string productName)
         {
@@ -160,6 +182,7 @@ namespace Northwind.Repository.Service
             }
 
             return result;
-        }        
+        }
+        
     }
 }
